@@ -153,7 +153,7 @@ sendfile(Socket, RawFile, Offset, Bytes, Opts) ->
 		[] -> [{chunk_size, 16#1FFF}];
 		_ -> Opts
 	end,
-	try file:sendfile(RawFile, Socket, Offset, Bytes, Opts2) of
+	try file_sendfile(Socket, RawFile, Offset, Bytes, Opts2) of
 		Result -> Result
 	catch
 		error:{badmatch, {error, enotconn}} ->
@@ -162,6 +162,14 @@ sendfile(Socket, RawFile, Offset, Bytes, Opts) ->
 			%% prim_file:sendfile/10 if the socket is not connected.
 			{error, closed}
 	end.
+
+-ifdef(ERLANG_R15_OR_NEWER).
+file_sendfile(Socket, RawFile, Offset, Bytes, Opts) ->
+	file:sendfile(RawFile, Socket, Offset, Bytes, Opts).
+-else.
+file_sendfile(Socket, RawFile, Offset, Bytes, Opts) ->
+	ranch_transport:sendfile(?MODULE, Socket, RawFile, Offset, Bytes, Opts).
+-endif.
 
 %% @doc Set options on the given socket.
 %% @see inet:setopts/2
