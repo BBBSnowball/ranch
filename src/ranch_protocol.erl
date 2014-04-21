@@ -15,10 +15,23 @@
 %% @private
 -module(ranch_protocol).
 
-%% Start a new connection process for the given socket.
+-ifdef(ERLANG_R15_OR_NEWER).
+
+% Start a new connection process for the given socket.
 -callback start_link(
 		Ref::ranch:ref(),
 		Socket::any(),
 		Transport::module(),
 		ProtocolOptions::any())
 	-> {ok, ConnectionPid::pid()}.
+
+-else.
+
+-export([behaviour_info/1]).
+
+behaviour_info(callbacks) ->
+    [{start_link,4}];
+behaviour_info(_Other) ->
+    undefined.
+
+-endif.

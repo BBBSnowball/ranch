@@ -18,9 +18,12 @@
 -export([sendfile/6]).
 
 -type socket() :: any().
--type opts() :: any().
 -type sendfile_opts() :: [{chunk_size, non_neg_integer()}].
 -export_type([sendfile_opts/0]).
+
+-ifdef(ERLANG_R15_OR_NEWER).
+
+-type opts() :: any().
 
 %% Name of the transport.
 -callback name() -> atom().
@@ -92,6 +95,34 @@
 
 %% Close the given socket.
 -callback close(socket()) -> ok.
+
+-else.	% ifdef(ERLANG_R15_OR_NEWER)
+
+-export([behaviour_info/1]).
+
+behaviour_info(callbacks) ->
+    [{name,0},
+     %{caps,1},
+     {messages,0},
+     {listen,1},
+     {accept,2},
+     {connect,3},
+     {recv,3},
+     {send,2},
+     {sendfile,2},
+     {sendfile,4},
+     {sendfile,5},
+     {setopts, 2},
+     {controlling_process,2},
+     {peername,1},
+     {sockname,1},
+     {close,1}];
+behaviour_info(_Other) ->
+    undefined.
+
+-endif.	% ifdef(ERLANG_R15_OR_NEWER)
+
+
 
 %% @doc Send part of a file on a socket.
 %%
